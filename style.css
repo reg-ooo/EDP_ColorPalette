@@ -93,6 +93,12 @@ h1::after{
     }
 }
 
+.button-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
 #generate-btn{
     background: linear-gradient(45deg, #F63049, #111F35);
     color: white;
@@ -101,7 +107,6 @@ h1::after{
     border-radius: 50px;
     cursor: pointer;
     font-weight: 500;
-    margin-bottom: 2rem;
     font-size: 1rem;
     position: relative;
 }
@@ -165,4 +170,25 @@ h1::after{
     .palette-container{
         grid-template-columns: repeat(auto-fit,minmax(100px, 1fr));
     }
+}
+
+#toggle-palette-btn{
+    background: linear-gradient(45deg, #F63049, #111F35);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    position: relative;
+}
+
+.analogous-toggle{
+    display: flex;
+    border-radius: 100px;
+    width: 15px;
+    height: 15px;
+    background-color: #ddd;
+
 }

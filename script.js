@@ -1,14 +1,25 @@
 // DOM ELEMENTS
 const generateBtn = document.getElementById("generate-btn");
 const paletteContainer = document.querySelector(".palette-container");
+const togglePaletteBtn = document.getElementById("toggle-palette-btn");
+const paletteLabelSpan = document.getElementById("palette-label");
+
 let currentColors = [];
-let analogousScheme = false;
+let analogousScheme = true;
 
 generatePalette(); // initial palette on loads
 
 generateBtn.addEventListener("click", () => {
     generatePalette();
 });
+
+togglePaletteBtn.addEventListener("click", () => {
+    analogousScheme = !analogousScheme;
+    paletteLabelSpan.textContent = analogousScheme ? "Switch Color Scheme - Analogous" : "Switch Color Scheme - Complementary";
+    togglePaletteBtn.style.background = `linear-gradient(135deg, ${currentColors.join(", ")})`;
+    generatePalette();
+});
+
 paletteContainer.addEventListener("click", (e) => {
     // find the closest copy button/icon in case the user clicks an inner <i> or child element
     const copyBtn = e.target.closest(".copy-btn");
@@ -111,6 +122,7 @@ function updatePaletteDisplay(colors){
 
 function updateBackground(){
     const body = document.body;
+    togglePaletteBtn.style.background = `linear-gradient(135deg, ${currentColors.join(", ")})`;
     generateBtn.style.background = `linear-gradient(45deg, ${currentColors.join(", ")})`;
     body.style.background = `linear-gradient(135deg, ${currentColors.join(", ")})`;     
 }
@@ -133,7 +145,6 @@ function complementaryHSL(h, s, l) {
 }
 
 function hexToHSL(hex){
-    // Convert hex to RGB
     const r = parseInt(hex.slice(1, 3), 16) / 255;
     const g = parseInt(hex.slice(3, 5), 16) / 255;
     const b = parseInt(hex.slice(5, 7), 16) / 255;
@@ -142,12 +153,12 @@ function hexToHSL(hex){
     let min = Math.min(r, g, b);
     let delta = max - min;
 
-    let l = (max + min) / 2;
-    let s = 0;
-    let h = 0;
+    let l = (max + min) / 2; // lightness
+    let s = 0; // saturation
+    let h = 0; // hue
 
     if (delta !== 0) {
-    s = delta / (1 - Math.abs(2 * l - 1));
+    s = delta / (1 - Math.abs(2 * l - 1)); // to find the saturation based on the lightness
 
     switch (max) {
       case r:
@@ -161,23 +172,23 @@ function hexToHSL(hex){
         break;
     }
 
-    h *= 60;
-    if (h < 0) h += 360;
+    h *= 60; // convert to degrees
+    if (h < 0) h += 360; // ensure positive hue
   }
 
   return {
     h: Math.round(h),
-    s: Math.round(s * 100),
+    s: Math.round(s * 100), // convert to percentage
     l: Math.round(l * 100)
   };
 }
 
 function hslToHex(h, s, l) {
-    s /= 100;
-    l /= 100;
-    let c = (1 - Math.abs(2 * l - 1)) * s;
-    let x = c * (1 - Math.abs((h / 60) % 2 - 1));
-    let m = l - c / 2;
+    s /= 100; // convert to decimal [0,1]
+    l /= 100; // convert to decimal [0,1]
+    let c = (1 - Math.abs(2 * l - 1)) * s; // chroma
+    let x = c * (1 - Math.abs((h / 60) % 2 - 1)); // second largest component
+    let m = l - c / 2; // match lightness
     let r = 0, g = 0, b = 0;
     if (0 <= h && h < 60) {
         r = c; g = x; b = 0;
