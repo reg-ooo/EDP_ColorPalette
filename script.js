@@ -1,8 +1,14 @@
 // DOM ELEMENTS
 const generateBtn = document.getElementById("generate-btn");
 const paletteContainer = document.querySelector(".palette-container");
+let currentColors = [];
+let analogousScheme = false;
 
-generateBtn.addEventListener("click", generatePalette);
+generatePalette(); // initial palette on loads
+
+generateBtn.addEventListener("click", () => {
+    generatePalette();
+});
 paletteContainer.addEventListener("click", (e) => {
     // find the closest copy button/icon in case the user clicks an inner <i> or child element
     const copyBtn = e.target.closest(".copy-btn");
@@ -54,12 +60,25 @@ function showCopySuccess(element){
 }
 
 function generatePalette() {
-    const colors = [];
-    for (let i = 0; i < 5; i++) {
-        colors.push(generateRandomColor());
+    currentColors = [];
+    const baseColor = generateRandomColor();
+    currentColors.push(baseColor);
+    const hsl = hexToHSL(baseColor);
+
+    if (analogousScheme) {
+        const analogousColors = analogousHSL(hsl.h, hsl.s, hsl.l);
+        analogousColors.forEach(color => {
+            const hexColor = hslToHex(color.h, color.s, color.l);
+            currentColors.push(hexColor);
+        });
+    } else {
+        const complementaryColor = complementaryHSL(hsl.h, hsl.s, hsl.l);
+        const hexColor = hslToHex(complementaryColor.h, complementaryColor.s, complementaryColor.l);
+        currentColors.push(hexColor);
     }
 
-    updatePaletteDisplay(colors);
+    updatePaletteDisplay(currentColors);
+    updateBackground();
 }
 
 function generateRandomColor(){
@@ -74,6 +93,10 @@ function generateRandomColor(){
 }
 
 function updatePaletteDisplay(colors){
+    paletteContainer.innerHTML = ""; // clear existing colors
+    for(let i = 0; i < colors.length; i++){
+        addColorBox();
+    }
     const colorBoxes = document.querySelectorAll(".color-box")
 
     colorBoxes.forEach((box, index) => {
@@ -86,6 +109,117 @@ function updatePaletteDisplay(colors){
     })
 }
 
+function updateBackground(){
+    const body = document.body;
+    generateBtn.style.background = `linear-gradient(45deg, ${currentColors.join(", ")})`;
+    body.style.background = `linear-gradient(135deg, ${currentColors.join(", ")})`;     
+}
 
+function analogousHSL(h, s, l) {
+    return [
+        { h: (h + 20) % 360, s: s, l: l },
+        { h: (h + 40) % 360, s: s, l: l },
+        { h: (h + 60) % 360, s: s, l: l },
+        { h: (h + 80) % 360, s: s, l: l }
+    ];
+}
 
-// generatePalette() // if you want to generate a new color palette every time you reload or visit, remove to have the default
+function complementaryHSL(h, s, l) {
+  return {
+    h: (h + 180) % 360,
+    s: s,
+    l: l
+  };
+}
+
+function hexToHSL(hex){
+    // Convert hex to RGB
+    const r = parseInt(hex.slice(1, 3), 16) / 255;
+    const g = parseInt(hex.slice(3, 5), 16) / 255;
+    const b = parseInt(hex.slice(5, 7), 16) / 255;
+
+    let max = Math.max(r, g, b);
+    let min = Math.min(r, g, b);
+    let delta = max - min;
+
+    let l = (max + min) / 2;
+    let s = 0;
+    let h = 0;
+
+    if (delta !== 0) {
+    s = delta / (1 - Math.abs(2 * l - 1));
+
+    switch (max) {
+      case r:
+        h = ((g - b) / delta) % 6;
+        break;
+      case g:
+        h = (b - r) / delta + 2;
+        break;
+      case b:
+        h = (r - g) / delta + 4;
+        break;
+    }
+
+    h *= 60;
+    if (h < 0) h += 360;
+  }
+
+  return {
+    h: Math.round(h),
+    s: Math.round(s * 100),
+    l: Math.round(l * 100)
+  };
+}
+
+function hslToHex(h, s, l) {
+    s /= 100;
+    l /= 100;
+    let c = (1 - Math.abs(2 * l - 1)) * s;
+    let x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    let m = l - c / 2;
+    let r = 0, g = 0, b = 0;
+    if (0 <= h && h < 60) {
+        r = c; g = x; b = 0;
+    } else if (60 <= h && h < 120) {
+        r = x; g = c; b = 0;
+    } else if (120 <= h && h < 180) {
+        r = 0; g = c; b = x;
+    } else if (180 <= h && h < 240) {
+        r = 0; g = x; b = c;
+    } else if (240 <= h && h < 300) {
+        r = x; g = 0; b = c;
+    } else if (300 <= h && h < 360) {
+        r = c; g = 0; b = x;
+    }
+    r = Math.round((r + m) * 255);
+    g = Math.round((g + m) * 255);
+    b = Math.round((b + m) * 255);
+
+    let hexR = r.toString(16).padStart(2, '0');
+    let hexG = g.toString(16).padStart(2, '0');
+    let hexB = b.toString(16).padStart(2, '0');
+
+    return `#${hexR}${hexG}${hexB}`.toUpperCase();
+}
+
+function addColorBox(){
+    const colorBox = document.createElement("div");
+    const colorDiv = document.createElement("div");
+    const colorInfo = document.createElement("div");
+
+    const hexValueSpan = document.createElement("span");
+    const icon = document.createElement("i");
+
+    colorBox.classList.add("color-box");
+    colorDiv.classList.add("color");
+    colorInfo.classList.add("color-info");
+    hexValueSpan.classList.add("hex-value");
+    icon.classList.add("far", "fa-copy", "copy-btn");
+
+    colorInfo.appendChild(hexValueSpan);
+    colorInfo.appendChild(icon);
+    colorBox.appendChild(colorDiv);
+    colorBox.appendChild(colorInfo);
+    paletteContainer.appendChild(colorBox);
+}
