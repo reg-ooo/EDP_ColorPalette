@@ -129,6 +129,7 @@ function updateBackground(){
     togglePaletteBtn.style.background = `linear-gradient(135deg, ${currentColors.join(", ")})`;
     generateBtn.style.background = `linear-gradient(45deg, ${currentColors.join(", ")})`;
     body.style.background = `linear-gradient(135deg, ${currentColors.join(", ")})`;     
+    saveBtn.style.background = `linear-gradient(45deg, ${currentColors.join(", ")})`;
 }
 
 function analogousHSL(h, s, l) {
@@ -294,6 +295,8 @@ function showSavedPalettes(){
 
         paletteDiv.addEventListener("click", () => {
             updatePaletteDisplay(colors);
+            currentColors = colors;
+            updateBackground();
         });
 
         palettesList.appendChild(paletteDiv);
