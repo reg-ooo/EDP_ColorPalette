@@ -379,37 +379,4 @@ function showDialog(message, type = 'alert', callback) {
     }
 }
 
-paletteContainer.addEventListener("click", (e) => {
-    // find the closest copy button/icon in case the user clicks an inner <i> or child element
-    const copyBtn = e.target.closest(".copy-btn");
-    if (copyBtn) {
-        const hexElement = copyBtn.previousElementSibling;
-        const hexValue = hexElement ? hexElement.textContent : "";
-
-        navigator.clipboard.writeText(hexValue)
-        .then(() => {
-            // prefer the icon element if present, otherwise use the button itself
-            const icon = copyBtn.querySelector("i") || copyBtn;
-            showCopySuccess(icon);
-        })
-        .catch((err) => console.log(err));
-        return;
-    }
-
-    const colorEl = e.target.closest(".color");
-    if (colorEl) {
-        const details = colorEl.nextElementSibling;
-        const hexEl = details ? details.querySelector(".hex-value") : null;
-        const hexValue = hexEl ? hexEl.textContent : "";
-
-        navigator.clipboard.writeText(hexValue)
-        .then(() => {
-            const copyBtnEl = details ? details.querySelector(".copy-btn") : null;
-            const icon = copyBtnEl ? (copyBtnEl.querySelector("i") || copyBtnEl) : null;
-            if (icon) showCopySuccess(icon);
-        })
-        .catch((err) => console.log(err));
-    }
-})
-
 showSavedPalettes();
