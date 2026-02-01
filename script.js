@@ -3,6 +3,10 @@ const generateBtn = document.getElementById("generate-btn");
 const paletteContainer = document.querySelector(".palette-container");
 const togglePaletteBtn = document.getElementById("toggle-palette-btn");
 const paletteLabelSpan = document.getElementById("palette-label");
+const saveBtn = document.getElementById("save-btn");
+const deleteBtn = document.getElementById("delete-btn");
+
+saveBtn.addEventListener("click", savePalette);
 
 let currentColors = [];
 let analogousScheme = true;
@@ -15,7 +19,7 @@ generateBtn.addEventListener("click", () => {
 
 togglePaletteBtn.addEventListener("click", () => {
     analogousScheme = !analogousScheme;
-    paletteLabelSpan.textContent = analogousScheme ? "Switch Color Scheme - Analogous" : "Switch Color Scheme - Complementary";
+    paletteLabelSpan.textContent = analogousScheme ? "Switch Scheme - Analogous" : "Switch Scheme - Complementary";
     togglePaletteBtn.style.background = `linear-gradient(135deg, ${currentColors.join(", ")})`;
     generatePalette();
 });
@@ -234,3 +238,178 @@ function addColorBox(){
     colorBox.appendChild(colorInfo);
     paletteContainer.appendChild(colorBox);
 }
+
+function savePalette(){
+    const savedColors = [];
+    const colorBoxes = document.querySelectorAll(".color-box");
+
+    colorBoxes.forEach(box => {
+        const hexValue = box.querySelector(".hex-value").textContent;
+        savedColors.push(hexValue);
+    });
+
+    const savedPalette = JSON.parse(localStorage.getItem("savedPalette")) || [];
+    // make sures we dont save duplicate palettes
+    if(savedPalette.some(palette => JSON.stringify(palette) === JSON.stringify(savedColors))){
+        showDialog("This palette is already saved!", 'alert');
+        return;
+    }
+
+    savedPalette.push(savedColors);
+    localStorage.setItem("savedPalette", JSON.stringify(savedPalette));
+    showDialog("Palette saved successfully!", 'alert');
+
+    showSavedPalettes();
+}
+
+function showSavedPalettes(){
+    const palettesList = document.querySelector(".palettes-list");
+    palettesList.innerHTML = ""; // Clear existing palettes
+
+    const savedPalette = JSON.parse(localStorage.getItem("savedPalette")) || [];
+    savedPalette.forEach((colors, index) => {
+        const paletteDiv = document.createElement("div");
+        paletteDiv.classList.add("saved-palette");
+
+        colors.forEach(color=> {
+            const colorDiv = document.createElement("div");
+            colorDiv.classList.add("saved-color");
+            colorDiv.style.backgroundColor = color;
+            paletteDiv.appendChild(colorDiv);
+        });
+
+        // Create delete button per saved palette
+        const deleteIcon = document.createElement("i");
+        deleteIcon.classList.add("fa-solid", "fa-trash", "delete-palette-btn");
+        deleteIcon.style.color = "#F00000";
+        deleteIcon.style.fontSize = "20px";
+        deleteIcon.title = "Delete this palette";
+
+        deleteIcon.addEventListener("click", (e) => {
+            e.stopPropagation();
+            deletePalette(index);
+        });
+
+        paletteDiv.appendChild(deleteIcon);
+
+        paletteDiv.addEventListener("click", () => {
+            updatePaletteDisplay(colors);
+        });
+
+        palettesList.appendChild(paletteDiv);
+    });
+}
+
+function deletePalette(index){
+    showDialog("Are you sure you want to delete this palette?", 'confirm', (confirmed) => {
+        if (confirmed) { 
+            const savedPalette = JSON.parse(localStorage.getItem("savedPalette")) || [];
+            savedPalette.splice(index, 1);
+            localStorage.setItem("savedPalette", JSON.stringify(savedPalette));
+            showSavedPalettes();
+        }
+    });
+}
+
+
+// Dialog 
+const overlay =  document.getElementById("overlay");
+const closedModalButtons = document.querySelectorAll("[data-close-button]");
+
+overlay.addEventListener("click", () => {
+    const modals = document.querySelectorAll(".dialog-overlay");
+    modals.forEach(modal => {
+        closeModal(modal);
+    });
+});
+
+closedModalButtons.forEach(button => {
+    button.addEventListener("click", () => {
+        const modal = button.closest(".dialog-overlay");
+        closeModal(modal);
+    });
+});
+
+function openModal(modal) {
+    if (modal == null) return;
+    modal.classList.add("active");
+    overlay.classList.add("active");
+}
+function closeModal(modal) {
+    if (modal == null) return;
+    modal.classList.remove("active");
+    overlay.classList.remove("active");
+}
+// Dialog Function
+function showDialog(message, type = 'alert', callback) {
+    const modal = document.getElementById("dialog-modal");
+    const messageEl = modal.querySelector("#dialog-message");
+    const confirmBtn = modal.querySelector("#dialog-confirm-btn");
+    const cancelBtn = modal.querySelector("#dialog-cancel-btn");
+
+    messageEl.textContent = message;
+
+    if (type === "alert") {
+        cancelBtn.style.display = "none";
+        confirmBtn.textContent = "OK";
+    } else {
+        cancelBtn.style.display = "block";
+        confirmBtn.textContent = "Yes";
+        cancelBtn.textContent = "No";
+    }
+
+    openModal(modal);
+
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+    document.getElementById("dialog-confirm-btn").addEventListener("click", () => {
+        closeModal(modal);
+        if (callback) callback(true);
+    });
+
+    if (type === "confirm") {
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+
+        document.getElementById("dialog-cancel-btn").addEventListener("click", () => {
+            closeModal(modal);
+            if (callback) callback(false);
+        });
+    }
+}
+
+paletteContainer.addEventListener("click", (e) => {
+    // find the closest copy button/icon in case the user clicks an inner <i> or child element
+    const copyBtn = e.target.closest(".copy-btn");
+    if (copyBtn) {
+        const hexElement = copyBtn.previousElementSibling;
+        const hexValue = hexElement ? hexElement.textContent : "";
+
+        navigator.clipboard.writeText(hexValue)
+        .then(() => {
+            // prefer the icon element if present, otherwise use the button itself
+            const icon = copyBtn.querySelector("i") || copyBtn;
+            showCopySuccess(icon);
+        })
+        .catch((err) => console.log(err));
+        return;
+    }
+
+    const colorEl = e.target.closest(".color");
+    if (colorEl) {
+        const details = colorEl.nextElementSibling;
+        const hexEl = details ? details.querySelector(".hex-value") : null;
+        const hexValue = hexEl ? hexEl.textContent : "";
+
+        navigator.clipboard.writeText(hexValue)
+        .then(() => {
+            const copyBtnEl = details ? details.querySelector(".copy-btn") : null;
+            const icon = copyBtnEl ? (copyBtnEl.querySelector("i") || copyBtnEl) : null;
+            if (icon) showCopySuccess(icon);
+        })
+        .catch((err) => console.log(err));
+    }
+})
+
+showSavedPalettes();
