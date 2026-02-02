@@ -297,6 +297,7 @@ function showSavedPalettes(){
             updatePaletteDisplay(colors);
             currentColors = colors;
             updateBackground();
+            paletteLabelSpan.textContent = currentColors.length == 5 ? "Switch Scheme - Analogous" : "Switch Scheme - Complementary";
         });
 
         palettesList.appendChild(paletteDiv);
@@ -343,6 +344,7 @@ function closeModal(modal) {
     modal.classList.remove("active");
     overlay.classList.remove("active");
 }
+
 // Dialog Function
 function showDialog(message, type = 'alert', callback) {
     const modal = document.getElementById("dialog-modal");
