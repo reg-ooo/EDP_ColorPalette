@@ -254,13 +254,13 @@ function savePalette(){
     const savedPalette = JSON.parse(localStorage.getItem("savedPalette")) || [];
     // make sures we dont save duplicate palettes
     if(savedPalette.some(palette => JSON.stringify(palette) === JSON.stringify(savedColors))){ // checks if any saved palette matches the current one
-        showDialog("This palette is already saved!", 'alert'); //shows alert dialog
+        showDialog("This palette is already saved!", 'alert'); 
         return;
     }
 
-    savedPalette.push(savedColors); // adds current palette to saved palettes
-    localStorage.setItem("savedPalette", JSON.stringify(savedPalette)); // saves updated palettes back to localStorage
-    showDialog("Palette saved successfully!", 'alert'); // shows success dialog
+    savedPalette.push(savedColors); 
+    localStorage.setItem("savedPalette", JSON.stringify(savedPalette)); 
+    showDialog("Palette saved successfully!", 'alert'); 
 
     showSavedPalettes(); //refresh the saved palettes display
 }
@@ -272,23 +272,23 @@ function showSavedPalettes(){
     const savedPalette = JSON.parse(localStorage.getItem("savedPalette")) || []; //retrieve saved palettes from localStorage
     // loops through each saved palette to create its display
     savedPalette.forEach((colors, index) => {
-        const paletteDiv = document.createElement("div"); // creates container for each saved palette
-        paletteDiv.classList.add("saved-palette"); //adds styling to the palette container
+        const paletteDiv = document.createElement("div");
+        paletteDiv.classList.add("saved-palette"); 
 
         // Create color boxes for each color in the saved palette
         colors.forEach(color=> {
-            const colorDiv = document.createElement("div"); //creates div for each color
-            colorDiv.classList.add("saved-color"); //adds styling to the color div
-            colorDiv.style.backgroundColor = color; // sets background color to the saved color
-            paletteDiv.appendChild(colorDiv); // adds color div to the palette container
+            const colorDiv = document.createElement("div"); 
+            colorDiv.classList.add("saved-color"); 
+            colorDiv.style.backgroundColor = color; 
+            paletteDiv.appendChild(colorDiv); 
         });
 
         // Create delete button per saved palette
-        const deleteIcon = document.createElement("i"); //creates an icon element for delete button
-        deleteIcon.classList.add("fa-solid", "fa-trash", "delete-palette-btn"); //font awesome classes for trash icon
-        deleteIcon.style.color = "#F00000"; //color
-        deleteIcon.style.fontSize = "20px";//icon size
-        deleteIcon.title = "Delete this palette";//tooltip text
+        const deleteIcon = document.createElement("i"); 
+        deleteIcon.classList.add("fa-solid", "fa-trash", "delete-palette-btn"); 
+        deleteIcon.style.color = "#F00000"; 
+        deleteIcon.style.fontSize = "20px";
+        deleteIcon.title = "Delete this palette";
 
          // Add click event to delete the palette
         deleteIcon.addEventListener("click", (e) => {
@@ -310,7 +310,7 @@ function showSavedPalettes(){
 }
 
 function deletePalette(index){
-    showDialog("Are you sure you want to delete this palette?", 'confirm', (confirmed) => { // pases a callback to handle user response
+    showDialog("Are you sure you want to delete this palette?", 'confirm', (confirmed) => { // passes a callback to handle user response
         if (confirmed) { //if yes...
             const savedPalette = JSON.parse(localStorage.getItem("savedPalette")) || [];//gets current saved palettes
             savedPalette.splice(index, 1); //removes the selected palette
@@ -339,17 +339,17 @@ function closeModal(modal) {
 
 // Dialog Function
 function showDialog(message, type = 'alert', callback) {
-    const modal = document.getElementById("dialog-modal");
+    const modal = document.getElementById("dialog-modal"); 
     const messageEl = modal.querySelector("#dialog-message");
-    const confirmBtn = modal.querySelector("#dialog-confirm-btn");
-    const cancelBtn = modal.querySelector("#dialog-cancel-btn");
+    const confirmBtn = modal.querySelector("#dialog-confirm-btn"); 
+    const cancelBtn = modal.querySelector("#dialog-cancel-btn"); 
 
-    messageEl.textContent = message;
+    messageEl.textContent = message; // sets the dialog message
 
-    if (type === "alert") {
+    if (type === "alert") { //if showing an alert dialog, hides the cancel button adn changes confirm button text to Ok
         cancelBtn.style.display = "none";
         confirmBtn.textContent = "OK";
-    } else {
+    } else { // if showing a confirm dialog, shows the cancel button and sets button texts accordingly
         cancelBtn.style.display = "block";
         confirmBtn.textContent = "Yes";
         cancelBtn.textContent = "No";
@@ -357,23 +357,23 @@ function showDialog(message, type = 'alert', callback) {
 
     openModal(modal); // show the dialog
 
-    const newConfirmBtn = confirmBtn.cloneNode(true);
-    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+    const newConfirmBtn = confirmBtn.cloneNode(true); //creates a new confirm button to replace the old one
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn); // replaces old confirm button to remove previous event listeners
 
-    document.getElementById("dialog-confirm-btn").addEventListener("click", () => {
-        closeModal(modal);
-        if (callback) callback(true);
+    document.getElementById("dialog-confirm-btn").addEventListener("click", () => { // adds click event listener to the new confirm button
+        closeModal(modal); // closes the dialog
+        if (callback) callback(true); // calls the callback with true if provided
     });
 
-    if (type === "confirm") {
-        const newCancelBtn = cancelBtn.cloneNode(true);
-        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+    if (type === "confirm") { // if confirm dialog, set up cancel button
+        const newCancelBtn = cancelBtn.cloneNode(true); // creates a new cancel button to replace the old one
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn); // replaces old cancel button to remove previous event listeners
 
-        document.getElementById("dialog-cancel-btn").addEventListener("click", () => {
+        document.getElementById("dialog-cancel-btn").addEventListener("click", () => { // adds click event listener to the new cancel button
             closeModal(modal);
             if (callback) callback(false);
         });
     }
 }
 
-showSavedPalettes();
+showSavedPalettes(); // initial display of saved palettes
