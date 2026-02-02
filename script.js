@@ -241,104 +241,96 @@ function addColorBox(){
 }
 
 function savePalette(){
-    const savedColors = [];
-    const colorBoxes = document.querySelectorAll(".color-box");
+    const savedColors = []; //array to hold current palette colors
+    const colorBoxes = document.querySelectorAll(".color-box"); //selects all color boxes
 
+    //loops through each color box to get hex values
     colorBoxes.forEach(box => {
-        const hexValue = box.querySelector(".hex-value").textContent;
-        savedColors.push(hexValue);
-    });
+        const hexValue = box.querySelector(".hex-value").textContent; //gets hex value
+        savedColors.push(hexValue); //adds hex value to array
+    }); 
 
+    // retrieve existing saved palettes from localStorage
     const savedPalette = JSON.parse(localStorage.getItem("savedPalette")) || [];
     // make sures we dont save duplicate palettes
-    if(savedPalette.some(palette => JSON.stringify(palette) === JSON.stringify(savedColors))){
-        showDialog("This palette is already saved!", 'alert');
+    if(savedPalette.some(palette => JSON.stringify(palette) === JSON.stringify(savedColors))){ // checks if any saved palette matches the current one
+        showDialog("This palette is already saved!", 'alert'); //shows alert dialog
         return;
     }
 
-    savedPalette.push(savedColors);
-    localStorage.setItem("savedPalette", JSON.stringify(savedPalette));
-    showDialog("Palette saved successfully!", 'alert');
+    savedPalette.push(savedColors); // adds current palette to saved palettes
+    localStorage.setItem("savedPalette", JSON.stringify(savedPalette)); // saves updated palettes back to localStorage
+    showDialog("Palette saved successfully!", 'alert'); // shows success dialog
 
-    showSavedPalettes();
+    showSavedPalettes(); //refresh the saved palettes display
 }
 
 function showSavedPalettes(){
-    const palettesList = document.querySelector(".palettes-list");
+    const palettesList = document.querySelector(".palettes-list"); // gets container for saved palettes
     palettesList.innerHTML = ""; // Clear existing palettes
 
-    const savedPalette = JSON.parse(localStorage.getItem("savedPalette")) || [];
+    const savedPalette = JSON.parse(localStorage.getItem("savedPalette")) || []; //retrieve saved palettes from localStorage
+    // loops through each saved palette to create its display
     savedPalette.forEach((colors, index) => {
-        const paletteDiv = document.createElement("div");
-        paletteDiv.classList.add("saved-palette");
+        const paletteDiv = document.createElement("div"); // creates container for each saved palette
+        paletteDiv.classList.add("saved-palette"); //adds styling to the palette container
 
+        // Create color boxes for each color in the saved palette
         colors.forEach(color=> {
-            const colorDiv = document.createElement("div");
-            colorDiv.classList.add("saved-color");
-            colorDiv.style.backgroundColor = color;
-            paletteDiv.appendChild(colorDiv);
+            const colorDiv = document.createElement("div"); //creates div for each color
+            colorDiv.classList.add("saved-color"); //adds styling to the color div
+            colorDiv.style.backgroundColor = color; // sets background color to the saved color
+            paletteDiv.appendChild(colorDiv); // adds color div to the palette container
         });
 
         // Create delete button per saved palette
-        const deleteIcon = document.createElement("i");
-        deleteIcon.classList.add("fa-solid", "fa-trash", "delete-palette-btn");
-        deleteIcon.style.color = "#F00000";
-        deleteIcon.style.fontSize = "20px";
-        deleteIcon.title = "Delete this palette";
+        const deleteIcon = document.createElement("i"); //creates an icon element for delete button
+        deleteIcon.classList.add("fa-solid", "fa-trash", "delete-palette-btn"); //font awesome classes for trash icon
+        deleteIcon.style.color = "#F00000"; //color
+        deleteIcon.style.fontSize = "20px";//icon size
+        deleteIcon.title = "Delete this palette";//tooltip text
 
+         // Add click event to delete the palette
         deleteIcon.addEventListener("click", (e) => {
-            e.stopPropagation();
-            deletePalette(index);
+            e.stopPropagation(); //prevents the click from triggering the palette selection
+            deletePalette(index); //calls delete function with the index of the palette
         });
 
-        paletteDiv.appendChild(deleteIcon);
-
+        paletteDiv.appendChild(deleteIcon); //adds delete icon to the palette container
+        // adds click event to load the palette when clicked
         paletteDiv.addEventListener("click", () => {
-            updatePaletteDisplay(colors);
-            currentColors = colors;
-            updateBackground();
-            paletteLabelSpan.textContent = currentColors.length == 5 ? "Switch Scheme - Analogous" : "Switch Scheme - Complementary";
+            updatePaletteDisplay(colors); //displays palette colors
+            currentColors = colors; //updates current colors
+            updateBackground();//updates background to match palette
+            paletteLabelSpan.textContent = currentColors.length == 5 ? "Switch Scheme - Analogous" : "Switch Scheme - Complementary"; //updates scheme
         });
 
-        palettesList.appendChild(paletteDiv);
+        palettesList.appendChild(paletteDiv); //adds complete palette div to list
     });
 }
 
 function deletePalette(index){
-    showDialog("Are you sure you want to delete this palette?", 'confirm', (confirmed) => {
-        if (confirmed) { 
-            const savedPalette = JSON.parse(localStorage.getItem("savedPalette")) || [];
-            savedPalette.splice(index, 1);
-            localStorage.setItem("savedPalette", JSON.stringify(savedPalette));
-            showSavedPalettes();
+    showDialog("Are you sure you want to delete this palette?", 'confirm', (confirmed) => { // pases a callback to handle user response
+        if (confirmed) { //if yes...
+            const savedPalette = JSON.parse(localStorage.getItem("savedPalette")) || [];//gets current saved palettes
+            savedPalette.splice(index, 1); //removes the selected palette
+            localStorage.setItem("savedPalette", JSON.stringify(savedPalette)); //saves updated palettes back to localStorage
+            showSavedPalettes(); //refreshes the saved palettes display
         }
     });
 }
 
 
 // Dialog 
-const overlay =  document.getElementById("overlay");
-const closedModalButtons = document.querySelectorAll("[data-close-button]");
+const overlay =  document.getElementById("overlay"); // gets overlay element
 
-overlay.addEventListener("click", () => {
-    const modals = document.querySelectorAll(".dialog-overlay");
-    modals.forEach(modal => {
-        closeModal(modal);
-    });
-});
-
-closedModalButtons.forEach(button => {
-    button.addEventListener("click", () => {
-        const modal = button.closest(".dialog-overlay");
-        closeModal(modal);
-    });
-});
-
+//shows the modal dialog and overlay
 function openModal(modal) {
     if (modal == null) return;
     modal.classList.add("active");
     overlay.classList.add("active");
 }
+//closes the modal dialog and overlay
 function closeModal(modal) {
     if (modal == null) return;
     modal.classList.remove("active");
@@ -363,7 +355,7 @@ function showDialog(message, type = 'alert', callback) {
         cancelBtn.textContent = "No";
     }
 
-    openModal(modal);
+    openModal(modal); // show the dialog
 
     const newConfirmBtn = confirmBtn.cloneNode(true);
     confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
