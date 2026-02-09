@@ -4,7 +4,6 @@ const paletteContainer = document.querySelector(".palette-container");
 const togglePaletteBtn = document.getElementById("toggle-palette-btn");
 const paletteLabelSpan = document.getElementById("palette-label");
 const saveBtn = document.getElementById("save-btn");
-const deleteBtn = document.getElementById("delete-btn");
 
 saveBtn.addEventListener("click", savePalette);
 
@@ -339,10 +338,10 @@ function closeModal(modal) {
 
 // Dialog Function
 function showDialog(message, type = 'alert', callback) {
-    const modal = document.getElementById("dialog-modal"); 
-    const messageEl = modal.querySelector("#dialog-message");
-    const confirmBtn = modal.querySelector("#dialog-confirm-btn"); 
-    const cancelBtn = modal.querySelector("#dialog-cancel-btn"); 
+    const modal = document.getElementById("dialog-modal"); // gets the dialog modal element
+    const messageEl = modal.querySelector("#dialog-message"); // gets the message element within the modal
+    const confirmBtn = modal.querySelector("#dialog-confirm-btn"); // gets the confirm button element
+    const cancelBtn = modal.querySelector("#dialog-cancel-btn"); // gets the cancel button element
 
     messageEl.textContent = message; // sets the dialog message
 
@@ -360,16 +359,16 @@ function showDialog(message, type = 'alert', callback) {
     const newConfirmBtn = confirmBtn.cloneNode(true); //creates a new confirm button to replace the old one
     confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn); // replaces old confirm button to remove previous event listeners
 
-    document.getElementById("dialog-confirm-btn").addEventListener("click", () => { // adds click event listener to the new confirm button
+    newConfirmBtn.addEventListener("click", () => { // adds click event listener to the new confirm button
         closeModal(modal); // closes the dialog
-        if (callback) callback(true); // calls the callback with true if provided
+        if (callback) callback(true); // calls the    callback with true if provided
     });
 
     if (type === "confirm") { // if confirm dialog, set up cancel button
         const newCancelBtn = cancelBtn.cloneNode(true); // creates a new cancel button to replace the old one
         cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn); // replaces old cancel button to remove previous event listeners
 
-        document.getElementById("dialog-cancel-btn").addEventListener("click", () => { // adds click event listener to the new cancel button
+        newCancelBtn.addEventListener("click", () => { // adds click event listener to the new cancel button
             closeModal(modal);
             if (callback) callback(false);
         });
